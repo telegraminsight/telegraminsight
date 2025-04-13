@@ -12,7 +12,8 @@
 
     <form id="channel-form" class="space-y-4">
       <img id="image-preview" src="#" alt="Предпросмотр" class="hidden w-24 h-24 object-cover rounded-full border border-gray-300 shadow">
-      <input type="file" name="imageFile" accept="image/*" class="w-full border px-3 py-2 rounded">
+     <input name="image" type="url" placeholder="Ссылка на изображение (например, с Imgur)" class="w-full border px-3 py-2 rounded">
+
       <input name="title" required placeholder="Название канала" class="w-full border px-3 py-2 rounded">
       <textarea name="description" placeholder="Описание" class="w-full border px-3 py-2 rounded"></textarea>
       <input name="subscribers" placeholder="Подписчиков" class="w-full border px-3 py-2 rounded">
@@ -81,19 +82,7 @@
       data.recommended = form.querySelector('[name="recommended"]').checked;
       if (!data.category) data.category = "finance";
 
-      const file = form.querySelector('[name="imageFile"]').files[0];
-      if (file) {
-        const filePath = `channel-logos/${Date.now()}_${file.name}`;
-        const fileRef = storageRef(storage, filePath);
-      try {
-  const snapshot = await uploadBytes(fileRef, file);
-  const url = await getDownloadURL(snapshot.ref);
-  data.image = url;
-  console.log("✅ Изображение успешно загружено:", url);
-} catch (error) {
-  console.error("❌ Ошибка загрузки изображения:", error);
-  alert("Не удалось загрузить изображение. Попробуйте другое или позже.");
-  return;
+    
 }
       }
 
