@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  <meta property="og:title" content="TelegramInsight — Анализ Telegram-каналов">
+  <meta property="og:description" content="Анализ Telegram-каналов без иллюзий. Помогаем рекламодателям выявлять накрутки, анализировать вовлечённость и принимать обоснованные решения.">
+  <meta property="og:image" content="https://telegraminsight.netlify.app/images/preview.jpg">
+  <meta property="og:url" content="https://telegraminsight.netlify.app/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TelegramInsight — Анализ Telegram-каналов">
+  <meta name="twitter:description" content="Анализ Telegram-каналов, выявление накруток и оценка вовлечённости.">
+  <meta name="twitter:image" content="https://telegraminsight.netlify.app/images/preview.jpg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TelegramInsight — Анализ Telegram-каналов</title>
@@ -28,23 +36,18 @@
     const requestForm = document.getElementById("channel-analysis-form");
     const loginBlock = document.getElementById("login-block");
 
-   onAuthStateChanged(auth, (user) => {
-  const logoutBtn = document.getElementById("logout-btn");
-  if (user) {
-    const greeting = document.getElementById("user-greeting");
-    greeting.textContent = `👋 Добро пожаловать, ${user.email}`;
-    greeting.classList.remove("hidden");
-    loginBlock.classList.add("hidden");
-    requestForm.classList.remove("hidden");
-    logoutBtn.classList.remove("hidden");
-  } else {
-    loginBlock.classList.remove("hidden");
-    requestForm.classList.add("hidden");
-    logoutBtn.classList.add("hidden");
-  }
-  logoutBtn.addEventListener("click", () => auth.signOut());
-});
-
+    onAuthStateChanged(auth, (user) => {
+      const logoutBtn = document.getElementById("logout-btn");
+      if (user) {
+        const greeting = document.getElementById("user-greeting");
+        greeting.textContent = `👋 Добро пожаловать, ${user.email}`;
+        greeting.classList.remove("hidden");$1 else {
+        loginBlock.classList.remove("hidden");
+        requestForm.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+      }
+      logoutBtn.addEventListener("click", () => auth.signOut());
+    });
 
     loginForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -138,4 +141,3 @@
   </footer>
 </body>
 </html>
-
