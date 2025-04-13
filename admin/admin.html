@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — TelegramInsight</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfMcGtHvwFqCKu5x5a1UnMpBSf2ayPapE",
+      authDomain: "telegraminsight.firebaseapp.com",
+      projectId: "telegraminsight",
+      storageBucket: "telegraminsight.appspot.com",
+      messagingSenderId: "384392963166",
+      appId: "1:384392963166:web:generatedvalue"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const formWrapper = document.getElementById("admin-form");
+    const form = document.getElementById("channel-form");
+
+    loginBtn.addEventListener("click", async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        alert("Ошибка входа: " + e.message);
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginBtn.classList.add("hidden");
+        logoutBtn.classList.remove("hidden");
+        formWrapper.classList.remove("hidden");
+      } else {
+        loginBtn.classList.remove("hidden");
+        logoutBtn.classList.add("hidden");
+        formWrapper.classList.add("hidden");
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      try {
+        await addDoc(collection(db, "channels"), data);
+        alert("Канал успешно добавлен!");
+        form.reset();
+      } catch (error) {
+        alert("Ошибка при добавлении: " + error.message);
+      }
+    });
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-xl mx-auto mt-12 p-6 bg-white rounded-xl shadow">
+    <h1 class="text-2xl font-bold mb-4">Админ-панель TelegramInsight</h1>
+    <button id="login-btn" class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Войти через Google</button>
+    <button id="logout-btn" class="mb-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hidden">Выйти</button>
+
+    <div id="admin-form" class="hidden">
+      <form id="channel-form" class="space-y-4">
+        <input name="title" type="text" placeholder="Название канала" required class="w-full border rounded px-3 py-2">
+        <input name="link" type="url" placeholder="Ссылка на канал" required class="w-full border rounded px-3 py-2">
+        <input name="subscribers" type="number" placeholder="Подписчиков" class="w-full border rounded px-3 py-2">
+        <input name="er" type="text" placeholder="ER (например: 7.3%)" class="w-full border rounded px-3 py-2">
+        <textarea name="description" placeholder="Описание канала" rows="4" class="w-full border rounded px-3 py-2"></textarea>
+        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Добавить канал</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
 
