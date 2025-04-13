@@ -1,1 +1,23 @@
+backend:
+  name: git-gateway
+  branch: main
 
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "channels"
+    label: "Каналы"
+    folder: "catalog"
+    create: true
+    slug: "{{slug}}"
+    extension: "html"
+    format: "frontmatter"
+    fields:
+      - { label: "Название канала", name: "title", widget: "string" }
+      - { label: "Описание", name: "description", widget: "text" }
+      - { label: "Подписчиков", name: "subscribers", widget: "string" }
+      - { label: "ER", name: "er", widget: "string" }
+      - { label: "Ссылка", name: "link", widget: "string" }
+      - { label: "Категория", name: "category", widget: "select", options: ["books", "finance", "news"] }
+      - { label: "Рекомендован", name: "recommendation", widget: "boolean", default: true }
