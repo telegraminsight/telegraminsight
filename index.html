@@ -28,18 +28,23 @@
     const requestForm = document.getElementById("channel-analysis-form");
     const loginBlock = document.getElementById("login-block");
 
-    onAuthStateChanged(auth, (user) => {
-      const logoutBtn = document.getElementById("logout-btn");
-      if (user) {
-        const greeting = document.getElementById("user-greeting");
-        greeting.textContent = `👋 Добро пожаловать, ${user.email}`;
-        greeting.classList.remove("hidden");$1 else {
-        loginBlock.classList.remove("hidden");
-        requestForm.classList.add("hidden");
-        logoutBtn.classList.add("hidden");
-      }
-      logoutBtn.addEventListener("click", () => auth.signOut());
-    });
+   onAuthStateChanged(auth, (user) => {
+  const logoutBtn = document.getElementById("logout-btn");
+  if (user) {
+    const greeting = document.getElementById("user-greeting");
+    greeting.textContent = `👋 Добро пожаловать, ${user.email}`;
+    greeting.classList.remove("hidden");
+    loginBlock.classList.add("hidden");
+    requestForm.classList.remove("hidden");
+    logoutBtn.classList.remove("hidden");
+  } else {
+    loginBlock.classList.remove("hidden");
+    requestForm.classList.add("hidden");
+    logoutBtn.classList.add("hidden");
+  }
+  logoutBtn.addEventListener("click", () => auth.signOut());
+});
+
 
     loginForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
