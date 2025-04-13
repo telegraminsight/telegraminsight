@@ -11,9 +11,7 @@
     <h1 class="text-2xl font-bold mb-4">Добавление канала</h1>
 
     <form id="channel-form" class="space-y-4">
-      <img id="image-preview" src="#" alt="Предпросмотр" class="hidden w-24 h-24 object-cover rounded-full border border-gray-300 shadow">
-     <input name="image" type="url" placeholder="Ссылка на изображение (например, с Imgur)" class="w-full border px-3 py-2 rounded">
-
+            <input name="image" type="url" placeholder="Ссылка на изображение (например, с Imgur)" class="w-full border px-3 py-2 rounded">
       <input name="title" required placeholder="Название канала" class="w-full border px-3 py-2 rounded">
       <textarea name="description" placeholder="Описание" class="w-full border px-3 py-2 rounded"></textarea>
       <input name="subscribers" placeholder="Подписчиков" class="w-full border px-3 py-2 rounded">
@@ -36,8 +34,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDfMcGtHvwFqCKu5x5a1UnMpBSf2ayPapE",
       authDomain: "telegraminsight.firebaseapp.com",
@@ -49,26 +46,12 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore();
-    const storage = getStorage();
+    // const storage = getStorage(); (не требуется для Imgur)
 
     const form = document.getElementById("channel-form");
     const imagePreview = document.getElementById("image-preview");
 
-    form.querySelector('[name="imageFile"]').addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        if (file.size > 1024 * 1024) {
-          alert("Файл слишком большой. Максимум — 1MB.");
-          e.target.value = "";
-          imagePreview.classList.add("hidden");
-          return;
-        }
-
-        reader.onload = () => {
-          imagePreview.src = reader.result;
-          imagePreview.classList.remove("hidden");
-        };
+    
         reader.readAsDataURL(file);
       } else {
         imagePreview.classList.add("hidden");
@@ -82,8 +65,10 @@
       data.recommended = form.querySelector('[name="recommended"]').checked;
       if (!data.category) data.category = "finance";
 
-    
-}
+      _${file.name}`;
+        const fileRef = storageRef(storage, filePath);
+        const snapshot = await uploadBytes(fileRef, file);
+        data.image = await getDownloadURL(snapshot.ref);
       }
 
       await addDoc(collection(db, "channels"), data);
@@ -93,6 +78,5 @@
   </script>
 </body>
 </html>
-
 
 
