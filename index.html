@@ -68,10 +68,13 @@
       }
     });
 
-    requestForm?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(requestForm);
-      const data = Object.fromEntries(formData);
+   requestForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const formData = new FormData(requestForm);
+  let data = Object.fromEntries(formData);
+  if (!data.category) data.category = "finance";
+  data.recommended = true;
+
       try {
         await addDoc(collection(db, "requests"), data);
         alert("Заявка отправлена!");
