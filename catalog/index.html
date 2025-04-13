@@ -4,55 +4,120 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Каталог каналов — TelegramInsight</title>
-  <meta name="description" content="Рекомендуемые и проверенные Telegram-каналы. Выбирайте лучшие площадки для рекламы и чтения.">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfMcGtHvwFqCKu5x5a1UnMpBSf2ayPapE",
+      authDomain: "telegraminsight.firebaseapp.com",
+      projectId: "telegraminsight",
+      storageBucket: "telegraminsight.appspot.com",
+      messagingSenderId: "384392963166",
+      appId: "1:384392963166:web:generatedvalue"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore();
+
+    const channelList = document.getElementById("channel-list");
+
+    const q = query(collection(db, "channels"));
+    onSnapshot(q, (snapshot) => {
+      const categoryFilter = document.getElementById("filter-category").value;
+      const onlyRecommended = document.getElementById("filter-recommended").checked;
+
+      const pagination = document.getElementById("pagination");
+      const channelList = document.getElementById("channel-list");
+      pagination.innerHTML = "";
+      channelList.innerHTML = "";
+
+      let docs = snapshot.docs.map(doc => doc.data());
+
+      if (categoryFilter !== "all") {
+        docs = docs.filter((d) => d.category === categoryFilter);
+      }
+      if (onlyRecommended) {
+        docs = docs.filter((d) => d.recommended);
+      }
+
+      docs.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+
+      const pageSize = 6;
+      let currentPage = 1;
+      const totalPages = Math.ceil(docs.length / pageSize);
+
+      const renderPage = (page) => {
+        channelList.innerHTML = "";
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        docs.slice(start, end).forEach((data) => {
+          const div = document.createElement("div");
+          div.className = "border rounded-xl p-5 shadow bg-white flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0";
+          div.innerHTML = `
+            <div class="flex-shrink-0">
+              <div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>
+            </div>
+            <div>
+              <h2 class="text-lg font-semibold mb-1">${data.title}</h2>
+              <p class="text-gray-600">${data.description || '—'}</p>
+              <p class="text-sm text-gray-500 mt-2">Категория: ${data.category || '—'} · Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</p>
+              <a href="${data.link}" target="_blank" class="text-blue-600 hover:underline text-sm">${data.link}</a>
+              ${data.recommended ? '<span class="text-xs inline-block mt-2 bg-green-100 text-green-700 px-2 py-1 rounded-full">✅ Рекомендуем</span>' : ''}
+              <button onclick="navigator.clipboard.writeText('${data.link}').then(() => alert('Ссылка скопирована!'))" class="text-xs mt-2 block text-gray-500 hover:text-gray-700">📋 Копировать ссылку</button>
+            </div>
+          `;
+          channelList.appendChild(div);
+        });
+        renderPagination(page);
+      };
+
+      const renderPagination = (page) => {
+        pagination.innerHTML = "";
+        if (page > 1) {
+          const prev = document.createElement("button");
+          prev.textContent = "← Предыдущая";
+          prev.className = "hover:underline";
+          prev.onclick = () => renderPage(page - 1);
+          pagination.appendChild(prev);
+        }
+        if (page < totalPages) {
+          const next = document.createElement("button");
+          next.textContent = "Следующая →";
+          next.className = "hover:underline";
+          next.onclick = () => renderPage(page + 1);
+          pagination.appendChild(next);
+        }
+      };
+
+      renderPage(currentPage);
+    });
+    });
+    });
+  document.getElementById("filter-category").addEventListener("change", () => location.reload());
+document.getElementById("filter-recommended").addEventListener("change", () => location.reload());
+</script>
 </head>
-<body class="bg-white text-gray-800">
-  <header class="p-6 border-b shadow-sm bg-white sticky top-0 z-10">
-    <div class="max-w-5xl mx-auto flex justify-between items-center">
-      <a href="/" class="flex items-center space-x-3">
-        <img src="/images/logo.png" alt="TelegramInsight Logo" class="w-8 h-8">
-        <span class="text-lg font-bold">TelegramInsight</span>
-      </a>
-      <nav class="space-x-4 text-sm">
-        <a href="/" class="hover:text-blue-600">Главная</a>
-        <a href="/cases" class="hover:text-blue-600">Кейсы</a>
-        <a href="/tools" class="hover:text-blue-600">Инструменты</a>
-        <a href="/glossary" class="hover:text-blue-600">Глоссарий</a>
-        <a href="/catalog" class="text-blue-600 font-semibold">Каталог</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="max-w-6xl mx-auto px-6 py-16">
-    <h1 class="text-3xl font-bold mb-6 text-center">Каталог проверенных Telegram-каналов</h1>
-
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <a href="/catalog/newschecker.html" class="block border rounded-xl p-5 shadow hover:shadow-md transition">
-  <h2 class="text-lg font-semibold">📰 @newschecker</h2>
-  <p class="text-gray-600">Актуальные новости без фейков. Коротко и по делу. Обновления каждый день.</p>
-  <p class="text-sm text-gray-500 mt-2">Подписчиков: 53,200 · ER: 5.2%</p>
-  <span class="inline-block mt-3 text-yellow-700 text-xs font-semibold bg-yellow-100 px-3 py-1 rounded-full">⚠️ Под наблюдением</span>
-</a>
-
-      <a href="/catalog/bookdigest.html" class="block border rounded-xl p-5 shadow hover:shadow-md transition">
-        <h2 class="text-lg font-semibold">📚 @bookdigest</h2>
-        <p class="text-gray-600">Канал о книгах, саморазвитии и мышлении. Обзоры и рекомендации.</p>
-        <p class="text-sm text-gray-500 mt-2">Подписчиков: 12,400 · ER: 15.2%</p>
-        <span class="inline-block mt-3 text-green-700 text-xs font-semibold bg-green-100 px-3 py-1 rounded-full">✅ Рекомендуем</span>
-      </a>
-
-      <a href="/catalog/finideas.html" class="block border rounded-xl p-5 shadow hover:shadow-md transition">
-        <h2 class="text-lg font-semibold">💼 @finideas</h2>
-        <p class="text-gray-600">Финансовая грамотность, инвестиции, практичные советы по деньгам.</p>
-        <p class="text-sm text-gray-500 mt-2">Подписчиков: 29,800 · ER: 8.7%</p>
-        <span class="inline-block mt-3 text-blue-700 text-xs font-semibold bg-blue-100 px-3 py-1 rounded-full">📊 Проанализирован</span>
-      </a>
-    </div>
-  </main>
-
-  <footer class="p-6 text-center text-sm text-gray-500 border-t mt-12">
-    TelegramInsight © 2025
-  </footer>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold mb-6">Каталог Telegram-каналов</h1>
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+  <select id="filter-category" class="border px-3 py-2 rounded text-sm">
+    <option value="all">Все категории</option>
+    <option value="books">Книги</option>
+    <option value="finance">Финансы</option>
+    <option value="news">Новости</option>
+    <option value="education">Образование</option>
+  </select>
+  <label class="text-sm flex items-center gap-2">
+    <input type="checkbox" id="filter-recommended">
+    Только рекомендованные
+  </label>
+</div>
+<div id="channel-list" class="space-y-6"></div>
+<div id="pagination" class="mt-8 flex flex-wrap justify-center gap-4 text-sm font-medium text-blue-600"></div>
+  </div>
 </body>
 </html>
+
