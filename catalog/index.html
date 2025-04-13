@@ -2,13 +2,36 @@
 <html lang="ru">
 <head>
   <link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
-<meta name="theme-color" content="#2563eb">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
+  <meta name="theme-color" content="#2563eb">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Каталог каналов — TelegramInsight</title>
+  <title>Каталог Telegram-каналов — TelegramInsight</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold mb-6">Каталог Telegram-каналов</h1>
+
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+      <select id="filter-category" class="border px-3 py-2 rounded text-sm">
+        <option value="all">Все категории</option>
+        <option value="books">Книги</option>
+        <option value="finance">Финансы</option>
+        <option value="news">Новости</option>
+        <option value="education">Образование</option>
+      </select>
+      <label class="text-sm flex items-center gap-2">
+        <input type="checkbox" id="filter-recommended">
+        Только рекомендованные
+      </label>
+    </div>
+
+    <div id="channel-list" class="space-y-6"></div>
+    <div id="pagination" class="mt-8 flex flex-wrap justify-center gap-4 text-sm font-medium text-blue-600"></div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -25,103 +48,84 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore();
 
+    const filterCategory = document.getElementById("filter-category");
+    const filterRecommended = document.getElementById("filter-recommended");
     const channelList = document.getElementById("channel-list");
+    const pagination = document.getElementById("pagination");
+
+    let currentPage = 1;
+    const pageSize = 6;
+
+    function renderChannels(docs, page) {
+      channelList.innerHTML = "";
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      docs.slice(start, end).forEach((data) => {
+        const div = document.createElement("div");
+        div.className = "border rounded-xl p-5 shadow bg-white flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0";
+        div.innerHTML = `
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold mb-1">${data.title}</h2>
+            <p class="text-gray-600">${data.description || '—'}</p>
+            <p class="text-sm text-gray-500 mt-2">Категория: ${data.category || '—'} · Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</p>
+            <a href="${data.link}" target="_blank" class="text-blue-600 hover:underline text-sm">${data.link}</a>
+            ${data.recommended ? '<span class="text-xs inline-block mt-2 bg-green-100 text-green-700 px-2 py-1 rounded-full">✅ Рекомендуем</span>' : ''}
+            <button onclick="navigator.clipboard.writeText('${data.link}').then(() => alert('Ссылка скопирована!'))" class="text-xs mt-2 block text-gray-500 hover:text-gray-700">📋 Копировать ссылку</button>
+          </div>
+        `;
+        channelList.appendChild(div);
+      });
+    }
+
+    function renderPagination(page, totalPages, docs) {
+      pagination.innerHTML = "";
+      if (page > 1) {
+        const prev = document.createElement("button");
+        prev.textContent = "← Предыдущая";
+        prev.className = "hover:underline";
+        prev.onclick = () => {
+          currentPage--;
+          renderChannels(docs, currentPage);
+          renderPagination(currentPage, totalPages, docs);
+        };
+        pagination.appendChild(prev);
+      }
+      if (page < totalPages) {
+        const next = document.createElement("button");
+        next.textContent = "Следующая →";
+        next.className = "hover:underline";
+        next.onclick = () => {
+          currentPage++;
+          renderChannels(docs, currentPage);
+          renderPagination(currentPage, totalPages, docs);
+        };
+        pagination.appendChild(next);
+      }
+    }
 
     const q = query(collection(db, "channels"));
     onSnapshot(q, (snapshot) => {
-      const categoryFilter = document.getElementById("filter-category").value;
-      const onlyRecommended = document.getElementById("filter-recommended").checked;
-
-      const pagination = document.getElementById("pagination");
-      const channelList = document.getElementById("channel-list");
-      pagination.innerHTML = "";
-      channelList.innerHTML = "";
-
       let docs = snapshot.docs.map(doc => doc.data());
 
-      if (categoryFilter !== "all") {
-        docs = docs.filter((d) => d.category === categoryFilter);
+      if (filterCategory.value !== "all") {
+        docs = docs.filter((d) => d.category === filterCategory.value);
       }
-      if (onlyRecommended) {
+      if (filterRecommended.checked) {
         docs = docs.filter((d) => d.recommended);
       }
 
       docs.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-
-      const pageSize = 6;
-      let currentPage = 1;
       const totalPages = Math.ceil(docs.length / pageSize);
 
-      const renderPage = (page) => {
-        channelList.innerHTML = "";
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        docs.slice(start, end).forEach((data) => {
-          const div = document.createElement("div");
-          div.className = "border rounded-xl p-5 shadow bg-white flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0";
-          div.innerHTML = `
-            <div class="flex-shrink-0">
-              <div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>
-            </div>
-            <div>
-              <h2 class="text-lg font-semibold mb-1">${data.title}</h2>
-              <p class="text-gray-600">${data.description || '—'}</p>
-              <p class="text-sm text-gray-500 mt-2">Категория: ${data.category || '—'} · Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</p>
-              <a href="${data.link}" target="_blank" class="text-blue-600 hover:underline text-sm">${data.link}</a>
-              ${data.recommended ? '<span class="text-xs inline-block mt-2 bg-green-100 text-green-700 px-2 py-1 rounded-full">✅ Рекомендуем</span>' : ''}
-              <button onclick="navigator.clipboard.writeText('${data.link}').then(() => alert('Ссылка скопирована!'))" class="text-xs mt-2 block text-gray-500 hover:text-gray-700">📋 Копировать ссылку</button>
-            </div>
-          `;
-          channelList.appendChild(div);
-        });
-        renderPagination(page);
-      };
+      renderChannels(docs, currentPage);
+      renderPagination(currentPage, totalPages, docs);
+    });
 
-      const renderPagination = (page) => {
-        pagination.innerHTML = "";
-        if (page > 1) {
-          const prev = document.createElement("button");
-          prev.textContent = "← Предыдущая";
-          prev.className = "hover:underline";
-          prev.onclick = () => renderPage(page - 1);
-          pagination.appendChild(prev);
-        }
-        if (page < totalPages) {
-          const next = document.createElement("button");
-          next.textContent = "Следующая →";
-          next.className = "hover:underline";
-          next.onclick = () => renderPage(page + 1);
-          pagination.appendChild(next);
-        }
-      };
-
-      renderPage(currentPage);
-    });
-    });
-    });
-  document.getElementById("filter-category").addEventListener("change", () => location.reload());
-document.getElementById("filter-recommended").addEventListener("change", () => location.reload());
-</script>
-</head>
-<body class="bg-gray-50 text-gray-800 min-h-screen">
-  <div class="max-w-4xl mx-auto px-4 py-10">
-    <h1 class="text-3xl font-bold mb-6">Каталог Telegram-каналов</h1>
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
-  <select id="filter-category" class="border px-3 py-2 rounded text-sm">
-    <option value="all">Все категории</option>
-    <option value="books">Книги</option>
-    <option value="finance">Финансы</option>
-    <option value="news">Новости</option>
-    <option value="education">Образование</option>
-  </select>
-  <label class="text-sm flex items-center gap-2">
-    <input type="checkbox" id="filter-recommended">
-    Только рекомендованные
-  </label>
-</div>
-<div id="channel-list" class="space-y-6"></div>
-<div id="pagination" class="mt-8 flex flex-wrap justify-center gap-4 text-sm font-medium text-blue-600"></div>
-  </div>
+    filterCategory.addEventListener("change", () => location.reload());
+    filterRecommended.addEventListener("change", () => location.reload());
+  </script>
 </body>
 </html>
-
