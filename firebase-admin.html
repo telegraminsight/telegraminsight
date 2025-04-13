@@ -85,8 +85,16 @@
       if (file) {
         const filePath = `channel-logos/${Date.now()}_${file.name}`;
         const fileRef = storageRef(storage, filePath);
-        const snapshot = await uploadBytes(fileRef, file);
-        data.image = await getDownloadURL(snapshot.ref);
+      try {
+  const snapshot = await uploadBytes(fileRef, file);
+  const url = await getDownloadURL(snapshot.ref);
+  data.image = url;
+  console.log("✅ Изображение успешно загружено:", url);
+} catch (error) {
+  console.error("❌ Ошибка загрузки изображения:", error);
+  alert("Не удалось загрузить изображение. Попробуйте другое или позже.");
+  return;
+}
       }
 
       await addDoc(collection(db, "channels"), data);
