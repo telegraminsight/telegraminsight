@@ -4,10 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — TelegramInsight</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-2xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Админка TelegramInsight</h1>
+
+    <form id="channel-form" class="space-y-4">
+      <input name="title" required placeholder="Название канала" class="w-full border px-3 py-2 rounded">
+      <textarea name="description" placeholder="Описание" class="w-full border px-3 py-2 rounded"></textarea>
+      <input name="subscribers" placeholder="Подписчиков" class="w-full border px-3 py-2 rounded">
+      <input name="er" placeholder="ER" class="w-full border px-3 py-2 rounded">
+      <input name="link" type="url" placeholder="Ссылка на канал" class="w-full border px-3 py-2 rounded">
+      <select name="category" class="w-full border rounded px-3 py-2">
+        <option value="">Выберите категорию</option>
+        <option value="books">Книги</option>
+        <option value="finance">Финансы</option>
+        <option value="news">Новости</option>
+        <option value="education">Образование</option>
+      </select>
+      <label class="inline-flex items-center text-sm">
+        <input type="checkbox" name="recommended" class="mr-2"> Рекомендуемый канал
+      </label>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Сохранить</button>
+    </form>
+
+    <div id="preview" class="border p-4 rounded bg-gray-50 text-sm text-gray-700 hidden mt-6">
+      <div class="border rounded-xl p-4 bg-white shadow flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0">
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold mb-1" id="preview-title">📦 Название</h2>
+          <p class="text-gray-600" id="preview-desc">Описание канала</p>
+          <p class="text-sm text-gray-500 mt-2" id="preview-meta">Категория: — · Подписчиков: — · ER: —</p>
+          <a id="preview-link" href="#" target="_blank" class="text-blue-600 hover:underline block mt-2">[ссылка]</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold mb-4">Список каналов</h2>
+      <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <select id="sort-mode" class="border px-3 py-1 rounded text-sm">
+          <option value="default">По дате</option>
+          <option value="title">По алфавиту</option>
+          <option value="category">По категории</option>
+          <option value="recommended">Только рекомендованные</option>
+        </select>
+        <input id="search-input" type="text" placeholder="Поиск по названию..." class="border px-3 py-1 rounded text-sm w-full sm:w-48">
+      </div>
+      <div id="channel-list"></div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDfMcGtHvwFqCKu5x5a1UnMpBSf2ayPapE",
@@ -22,231 +76,107 @@
     const auth = getAuth();
     const db = getFirestore();
 
-    const loginForm = document.getElementById("login-form");
-    const logoutBtn = document.getElementById("logout-btn");
-    const formWrapper = document.getElementById("admin-form");
     const form = document.getElementById("channel-form");
+    const channelList = document.getElementById("channel-list");
 
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = loginForm.email.value;
-      const password = loginForm.password.value;
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        if (err.code === 'auth/user-not-found') {
-          // Автоматическая регистрация, если пользователь не существует
-          await createUserWithEmailAndPassword(auth, email, password);
-        } else {
-          alert("Ошибка входа: " + err.message);
-        }
-      }
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      signOut(auth);
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginForm.classList.add("hidden");
-        logoutBtn.classList.remove("hidden");
-        formWrapper.classList.remove("hidden");
-      } else {
-        loginForm.classList.remove("hidden");
-        logoutBtn.classList.add("hidden");
-        formWrapper.classList.add("hidden");
-      }
-    });
-
-    form.addEventListener("input", () => {
-  const formData = new FormData(form);
-  const data = Object.fromEntries(formData);
-  document.getElementById("preview-title").textContent = data.title || "📦 Название канала";
-  document.getElementById("preview-desc").textContent = data.description || "Описание канала";
-  const recommended = form.querySelector('[name="recommended"]').checked;
-  const category = form.querySelector('[name="category"]').value;
-  document.getElementById("preview-meta").textContent = `Категория: ${category || "—"} · Подписчиков: ${data.subscribers || "—"} · ER: ${data.er || "—"}` + (recommended ? " · ✅ Рекомендуем" : "");
-  const linkEl = document.getElementById("preview-link");
-  linkEl.href = data.link || "#";
-  linkEl.textContent = data.link || "[ссылка]";
-  document.getElementById("preview").classList.remove("hidden");
-});
+    let editId = null;
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-      try {
-        const editId = form.getAttribute("data-edit-id");
+      let data = Object.fromEntries(formData);
+      data.recommended = form.querySelector('[name="recommended"]').checked;
+
+      if (!data.category) data.category = "finance";
       if (editId) {
         await updateDoc(doc(db, "channels", editId), data);
-        alert("Канал обновлён!");
-        form.removeAttribute("data-edit-id");
-        form.querySelector("button[type=submit]").textContent = "Добавить канал";
+        editId = null;
       } else {
         await addDoc(collection(db, "channels"), data);
-        alert("Канал успешно добавлен!");
       }
-        alert("Канал успешно добавлен!");
-        form.reset();
-      } catch (error) {
-        alert("Ошибка при добавлении: " + error.message);
-      }
+      form.reset();
     });
-      import { query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const channelList = document.getElementById("channel-list");
+    form.addEventListener("input", () => {
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      document.getElementById("preview-title").textContent = data.title || "📦 Название канала";
+      document.getElementById("preview-desc").textContent = data.description || "Описание канала";
+      const recommended = form.querySelector('[name="recommended"]').checked;
+      const category = form.querySelector('[name="category"]').value;
+      document.getElementById("preview-meta").textContent = `Категория: ${category || "—"} · Подписчиков: ${data.subscribers || "—"} · ER: ${data.er || "—"}` + (recommended ? " · ✅ Рекомендуем" : "");
+      const linkEl = document.getElementById("preview-link");
+      linkEl.href = data.link || "#";
+      linkEl.textContent = data.link || "[ссылка]";
+      document.getElementById("preview").classList.remove("hidden");
+    });
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginForm.classList.add("hidden");
-        logoutBtn.classList.remove("hidden");
-        formWrapper.classList.remove("hidden");
-
-        const q = query(collection(db, "channels"));
-        const searchInput = document.getElementById("search-input");
-          const searchTerm = (searchInput?.value || "").toLowerCase();
-
-          let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-          if (sortMode === "title") {
-            docs.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-          } else if (sortMode === "category") {
-            docs.sort((a, b) => (a.category || "").localeCompare(b.category || ""));
-          } else if (sortMode === "recommended") {
-            docs = docs.filter((doc) => doc.recommended);
+    function editChannel(id) {
+      editId = id;
+      getDoc(doc(db, "channels", id)).then((docSnap) => {
+        const data = docSnap.data();
+        Object.entries(data).forEach(([key, value]) => {
+          const input = form.querySelector(`[name="${key}"]`);
+          if (!input) return;
+          if (input.type === "checkbox") {
+            input.checked = !!value;
+          } else {
+            input.value = value;
           }
-
-          if (searchTerm) {
-            docs = docs.filter((doc) => (doc.title || "").toLowerCase().includes(searchTerm));
-          }
-
-          docs.forEach((data) => {
-            const div = document.createElement("div");
-            div.className = "border rounded p-4 mb-3 bg-gray-50";
-            div.innerHTML = `
-              <h3 class="font-semibold">${data.title}</h3>
-              <p class="text-sm text-gray-600">${data.description || "—"}</p>
-              <p class="text-xs text-gray-500 mt-1">Категория: ${data.category || "—"} · Подписчиков: ${data.subscribers || "—"}, ER: ${data.er || "—"}</p>
-              <a href="${data.link}" target="_blank" class="text-blue-600 text-sm hover:underline">${data.link}</a>
-              <div class="mt-2 space-x-2">
-                <button onclick="editChannel('${data.id}')" class="text-xs px-3 py-1 bg-yellow-300 text-black rounded hover:bg-yellow-400">Редактировать</button>
-                <button onclick="deleteChannel('${data.id}')" class="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Удалить</button>
-              </div>
-            `;
-            channelList.appendChild(div);
-          });
         });
-      } else {
-        loginForm.classList.remove("hidden");
-        logoutBtn.classList.add("hidden");
-        formWrapper.classList.add("hidden");
+      });
+    }
+
+    function deleteChannel(id) {
+      if (confirm("Удалить канал?")) {
+        deleteDoc(doc(db, "channels", id));
       }
+    }
+
+    window.editChannel = editChannel;
+    window.deleteChannel = deleteChannel;
+
+    const q = query(collection(db, "channels"));
+    onSnapshot(q, (snapshot) => {
+      const sortMode = document.getElementById("sort-mode").value;
+      const searchInput = document.getElementById("search-input");
+      const searchTerm = (searchInput?.value || "").toLowerCase();
+
+      channelList.innerHTML = "";
+      let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      if (sortMode === "title") {
+        docs.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      } else if (sortMode === "category") {
+        docs.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+      } else if (sortMode === "recommended") {
+        docs = docs.filter((doc) => doc.recommended);
+      }
+
+      if (searchTerm) {
+        docs = docs.filter((doc) => (doc.title || '').toLowerCase().includes(searchTerm));
+      }
+
+      docs.forEach((data) => {
+        const div = document.createElement("div");
+        div.className = "border rounded p-4 mb-3 bg-gray-50";
+        div.innerHTML = `
+          <h3 class="font-semibold">${data.title}</h3>
+          <p class="text-sm text-gray-600">${data.description || "—"}</p>
+          <p class="text-xs text-gray-500 mt-1">Категория: ${data.category || "—"} · Подписчиков: ${data.subscribers || "—"}, ER: ${data.er || "—"}</p>
+          <a href="${data.link}" target="_blank" class="text-blue-600 text-sm hover:underline">${data.link}</a>
+          <div class="mt-2 space-x-2">
+            <button onclick="editChannel('${data.id}')" class="text-xs px-3 py-1 bg-yellow-300 text-black rounded hover:bg-yellow-400">Редактировать</button>
+            <button onclick="deleteChannel('${data.id}')" class="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Удалить</button>
+          </div>
+        `;
+        channelList.appendChild(div);
+      });
     });
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-white">
-  <div class="max-w-xl mx-auto mt-12 p-6 bg-white rounded-xl shadow">
-    <h1 class="text-2xl font-bold mb-4">Админ-панель TelegramInsight</h1>
 
-    <form id="login-form" class="space-y-4 mb-6">
-      <input name="email" type="email" placeholder="Email" required class="w-full border rounded px-3 py-2">
-      <input name="password" type="password" placeholder="Пароль" required class="w-full border rounded px-3 py-2">
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Войти / Зарегистрироваться</button>
-    </form>
-
-    <button id="logout-btn" class="mb-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hidden">Выйти</button>
-
-    <div id="admin-form" class="hidden">
-      $1
-        <select name="category" class="w-full border rounded px-3 py-2">
-          <option value="">Выберите категорию</option>
-          <option value="books">Книги</option>
-          <option value="finance">Финансы</option>
-          <option value="news">Новости</option>
-          <option value="education">Образование</option>
-        </select>
-        <label class="inline-flex items-center text-sm">
-          <input type="checkbox" name="recommended" class="mr-2">
-          Рекомендуемый канал
-        </label>
-        <div id="preview" class="border p-4 rounded bg-gray-50 text-sm text-gray-700 hidden">
-  <div class="border rounded-xl p-4 bg-white shadow flex items-start space-x-4">
-    <div class="flex-shrink-0">
-      <div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>
-    </div>
-    <div>
-      <h2 class="text-lg font-semibold mb-1" id="preview-title">📦 Название</h2>
-      <p class="text-gray-600" id="preview-desc">Описание канала</p>
-      <p class="text-sm text-gray-500 mt-2" id="preview-meta">Подписчиков: — · ER: —</p>
-      <a id="preview-link" href="#" target="_blank" class="text-blue-600 hover:underline block mt-2">[ссылка]</a>
-    </div>
-  </div>
-</div>
-</div>
-        <input name="title" type="text" placeholder="Название канала" required class="w-full border rounded px-3 py-2">
-        <input name="link" type="url" placeholder="Ссылка на канал" required class="w-full border rounded px-3 py-2">
-        <input name="subscribers" type="number" placeholder="Подписчиков" class="w-full border rounded px-3 py-2">
-        <input name="er" type="text" placeholder="ER (например: 7.3%)" class="w-full border rounded px-3 py-2">
-        <textarea name="description" placeholder="Описание канала" rows="4" class="w-full border rounded px-3 py-2"></textarea>
-        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Добавить канал</button>
-      </form>
-    </div>
-      <div class="max-w-xl mx-auto mt-8">
-  <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
-  <div class="flex items-center gap-2">
-    <label class="text-sm font-medium">Сортировать:</label>
-    <select id="sort-mode" class="border px-3 py-1 rounded text-sm">
-      <option value="default">По дате</option>
-      <option value="title">По алфавиту</option>
-      <option value="category">По категории</option>
-      <option value="recommended">Только рекомендованные</option>
-    </select>
-  </div>
-  <div class="flex items-center gap-2">
-    <label for="search-input" class="text-sm font-medium">Поиск:</label>
-    <input id="search-input" type="text" placeholder="Название..." class="border px-3 py-1 rounded text-sm w-full sm:w-48">
-  </div>
-</div>
-  <div id="channel-list"></div>
-</div>
-  </div>
-<script type="module">
-  import { deleteDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  window.deleteChannel = async (id) => {
-    if (confirm("Удалить этот канал?")) {
-      try {
-        await deleteDoc(doc(db, "channels", id));
-        alert("Канал удалён");
-      } catch (e) {
-        alert("Ошибка удаления: " + e.message);
-      }
-    }
-  };
-
-  window.editChannel = async (id) => {
-    const ref = doc(db, "channels", id);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      alert("Канал не найден");
-      return;
-    }
-    const data = snap.data();
-    document.querySelector('#channel-form [name="title"]').value = data.title || "";
-    document.querySelector('#channel-form [name="link"]').value = data.link || "";
-    document.querySelector('#channel-form [name="subscribers"]').value = data.subscribers || "";
-    document.querySelector('#channel-form [name="er"]').value = data.er || "";
-    document.querySelector('#channel-form [name="description"]').value = data.description || "";
-    document.querySelector('#channel-form [name="category"]').value = data.category || "";
-    document.querySelector('#channel-form [name="recommended"]').checked = data.recommended || false;
-    form.setAttribute("data-edit-id", id);
-    form.querySelector("button[type=submit]").textContent = "Сохранить изменения";
-  };
-document.getElementById("sort-mode").addEventListener("change", () => location.reload());
-document.getElementById("search-input").addEventListener("input", () => location.reload());
-</script>
+    document.getElementById("sort-mode").addEventListener("change", () => location.reload());
+    document.getElementById("search-input").addEventListener("input", () => location.reload());
+  </script>
 </body>
 </html>
 
