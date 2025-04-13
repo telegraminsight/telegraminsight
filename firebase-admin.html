@@ -61,21 +61,7 @@
       form.reset();
       alert("Канал успешно добавлен!");
     });
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      let data = Object.fromEntries(formData);
-      data.recommended = form.querySelector('[name="recommended"]').checked;
-      if (!data.category) data.category = "finance";
-
-      
-      }
-
-      await addDoc(collection(db, "channels"), data);
-      form.reset();
-      alert("Канал успешно добавлен!");
-    });
   </script>
 </body>
 </html>
+
