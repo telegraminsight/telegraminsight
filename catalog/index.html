@@ -8,7 +8,36 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
   <meta name="theme-color" content="#2563eb">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com">// Мобильное меню
+    const menuToggle = document.getElementById("menu-toggle");
+    const mobileNav = document.getElementById("mobile-nav");
+    menuToggle?.addEventListener("click", () => {
+      mobileNav.classList.toggle("hidden");
+    });
+// Мобильное меню
+    const menuToggle = document.getElementById("menu-toggle");
+    const mobileNav = document.getElementById("mobile-nav");
+    menuToggle?.addEventListener("click", () => {
+      mobileNav.classList.toggle("hidden");
+    });
+
+    // Отображение заглавной буквы пользователя, если он авторизован
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    const auth = getAuth();
+    const avatar = document.getElementById("user-avatar");
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.email) {
+        const letter = user.email[0].toUpperCase();
+        avatar.textContent = letter;
+        avatar.classList.remove("hidden");
+        document.getElementById("user-menu")?.classList.remove("hidden");
+      }
+    });
+// Обработка выхода из аккаунта
+    document.getElementById("logout-btn")?.addEventListener("click", () => {
+      auth.signOut().then(() => location.reload());
+    });
+</script>
   <script>
     tailwind.config = {
       darkMode: 'class'
@@ -16,6 +45,39 @@
   </script>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+  <header class="border-b dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+  <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <a href="/" class="text-xl font-bold text-blue-600 dark:text-blue-400">TelegramInsight</a>
+      <div class="relative group">
+        <span id="user-avatar" class="hidden sm:inline-block w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 text-center text-sm font-bold text-gray-700 dark:text-gray-300 leading-8 cursor-pointer">?</span>
+        <div id="user-menu" class="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow-md text-sm text-gray-700 dark:text-gray-300 hidden group-hover:block z-10">
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Профиль</a>
+          <button id="logout-btn" class="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Выйти</button>
+        </div>
+      </div>
+    </div>
+    <a href="/" class="text-xl font-bold text-blue-600 dark:text-blue-400">TelegramInsight</a>
+    <button id="menu-toggle" class="sm:hidden text-gray-600 dark:text-gray-300 focus:outline-none">
+      ☰
+    </button>
+    <nav id="main-nav" class="hidden sm:flex space-x-4 text-sm">
+      <a href="/catalog" class="hover:underline">Каталог</a>
+      <a href="/cases" class="hover:underline">Кейсы</a>
+      <a href="/tools" class="hover:underline">Инструменты</a>
+      <a href="/blog" class="hover:underline">Блог</a>
+      <a href="/glossary" class="hover:underline">Глоссарий</a>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="sm:hidden hidden px-4 pb-4 space-y-2 text-sm">
+    <a href="/catalog" class="block hover:underline">Каталог</a>
+    <a href="/cases" class="block hover:underline">Кейсы</a>
+    <a href="/tools" class="block hover:underline">Инструменты</a>
+    <a href="/blog" class="block hover:underline">Блог</a>
+    <a href="/glossary" class="block hover:underline">Глоссарий</a>
+  </div>
+    </div>
+  </header>
   <div class="max-w-4xl mx-auto px-4 py-10">
     <div class="flex justify-end mb-4">
       <button id="theme-toggle" class="px-3 py-1 text-sm border rounded text-gray-600 dark:text-gray-300 dark:text-gray-300 dark:border-gray-500">
@@ -25,21 +87,21 @@
     <h1 class="text-3xl font-bold mb-6">Каталог Telegram-каналов</h1>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
-      <input id="search-input" type="text" placeholder="Поиск по названию или описанию..." class="border px-3 py-2 rounded text-sm w-full sm:w-64">
-      <select id="sort-mode" class="border px-3 py-2 rounded text-sm">
+      <input id="search-input" type="text" placeholder="Поиск по названию или описанию..." class="border px-3 py-2 rounded text-sm w-full sm:w-64 bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
+      <select id="sort-mode" class="border px-3 py-2 rounded text-sm bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
         <option value="title">По алфавиту</option>
         <option value="subscribers">По подписчикам</option>
         <option value="er">По ER</option>
       </select>
 
-      <select id="filter-category" class="border px-3 py-2 rounded text-sm">
+      <select id="filter-category" class="border px-3 py-2 rounded text-sm bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
         <option value="all">Все категории</option>
         <option value="books">Книги</option>
         <option value="finance">Финансы</option>
         <option value="news">Новости</option>
         <option value="education">Образование</option>
       </select>
-      <label class="text-sm flex items-center gap-2">
+      <label class="text-sm flex items-center gap-2 text-gray-700 dark:text-gray-300">
         <input type="checkbox" id="filter-recommended">
         Только рекомендованные
       </label>
@@ -90,15 +152,22 @@
       const end = start + pageSize;
       docs.slice(start, end).forEach((data) => {
         const div = document.createElement("div");
-        div.className = "border rounded-xl p-5 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0";
+        div.className = "border rounded-xl p-5 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex sm:items-start gap-4 sm:gap-6 sm:flex-nowrap";
         const avatar = data.image && data.image.startsWith("http")
           ? `<img src="${data.image}" alt="${data.title}" class="w-12 h-12 rounded-full object-cover">`
           : `<div class="w-12 h-12 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 flex items-center justify-center rounded-full text-lg font-bold">TG</div>`;
         div.innerHTML = `
           <div class="flex-shrink-0">${avatar}</div>
-          <div>
+          <div class="flex-1 min-w-0">
             <h2 class="text-lg font-semibold mb-1">${data.title}</h2>
-            <p class="text-gray-600">${data.description || '—'}</p>
+            <p class="text-gray-600 dark:text-gray-300 line-clamp-3 transition-all duration-500 ease-in-out overflow-hidden max-h-[4.5em]">${data.description || '—'}</p>
+${(data.description || '').length > 120 ? `<button onclick="const desc = this.previousElementSibling; desc.style.maxHeight = desc.scrollHeight + 'px';
+setTimeout(() => {
+  desc.classList.remove('line-clamp-3');
+  desc.classList.add('max-h-full');
+  desc.style.maxHeight = null;
+  desc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}, 300); this.remove()" class="mt-1 text-xs text-blue-500 hover:underline">Читать далее</button>` : ''}
             <div class="flex items-center flex-wrap gap-2 mt-2">
               <span class="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
                 ${categoryLabel(data.category)}
@@ -111,7 +180,12 @@
             <button onclick="navigator.clipboard.writeText('${data.link}').then(() => alert('Ссылка скопирована!'))" class="text-xs mt-2 block text-gray-500 hover:text-gray-700">📋 Копировать ссылку</button>
           </div>
         `;
+        div.style.opacity = 0;
         channelList.appendChild(div);
+        requestAnimationFrame(() => {
+          div.classList.add("transition-opacity", "duration-500");
+          div.style.opacity = 1;
+        });
       });
     }
 
@@ -222,4 +296,5 @@ onSnapshot(q, (snapshot) => {
 </footer>
 </body>
 </html>
+
 
