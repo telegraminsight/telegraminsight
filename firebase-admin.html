@@ -11,7 +11,7 @@
     <h1 class="text-2xl font-bold mb-4">Добавление канала</h1>
 
     <form id="channel-form" class="space-y-4">
-            <input name="image" type="url" placeholder="Ссылка на изображение (например, с Imgur)" class="w-full border px-3 py-2 rounded">
+      <input name="image" type="url" placeholder="Ссылка на изображение (например, с Imgur)" class="w-full border px-3 py-2 rounded">
       <input name="title" required placeholder="Название канала" class="w-full border px-3 py-2 rounded">
       <textarea name="description" placeholder="Описание" class="w-full border px-3 py-2 rounded"></textarea>
       <input name="subscribers" placeholder="Подписчиков" class="w-full border px-3 py-2 rounded">
@@ -34,7 +34,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDfMcGtHvwFqCKu5x5a1UnMpBSf2ayPapE",
       authDomain: "telegraminsight.firebaseapp.com",
@@ -46,7 +47,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore();
-    // const storage = getStorage(); (не требуется для Imgur)
+    const auth = getAuth();
 
     const form = document.getElementById("channel-form");
 
@@ -57,13 +58,18 @@
       data.recommended = form.querySelector('[name="recommended"]').checked;
       if (!data.category) data.category = "finance";
 
-     await addDoc(collection(db, "channels"), {
-  ...data,
-  createdAt: new Date()  // или serverTimestamp(), если используем серверное время
-});
-
-      form.reset();
-      alert("Канал успешно добавлен!");
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          await addDoc(collection(db, "channels"), {
+            ...data,
+            createdAt: new Date()
+          });
+          form.reset();
+          alert("Канал успешно добавлен!");
+        } else {
+          alert("Вы должны войти в систему, чтобы добавить канал.");
+        }
+      });
     });
   </script>
 </body>
