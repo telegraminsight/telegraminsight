@@ -13,7 +13,7 @@
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
   <div class="max-w-4xl mx-auto px-4 py-10">
     <div class="flex justify-end mb-4">
-      <button id="theme-toggle" class="px-3 py-1 text-sm border rounded text-gray-600 dark:text-gray-300 dark:border-gray-500">
+      <button id="theme-toggle" class="px-3 py-1 text-sm border rounded text-gray-600 dark:text-gray-300 dark:text-gray-300 dark:border-gray-500">
         🌗 Тема
       </button>
     </div>
@@ -85,10 +85,10 @@
       const end = start + pageSize;
       docs.slice(start, end).forEach((data) => {
         const div = document.createElement("div");
-        div.className = "border rounded-xl p-5 shadow bg-white flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0";
+        div.className = "border rounded-xl p-5 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0";
         const avatar = data.image && data.image.startsWith("http")
           ? `<img src="${data.image}" alt="${data.title}" class="w-12 h-12 rounded-full object-cover">`
-          : `<div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>`;
+          : `<div class="w-12 h-12 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 flex items-center justify-center rounded-full text-lg font-bold">TG</div>`;
         div.innerHTML = `
           <div class="flex-shrink-0">${avatar}</div>
           <div>
@@ -98,11 +98,11 @@
               <span class="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
                 ${categoryLabel(data.category)}
               </span>
-              <span class="text-sm text-gray-500">Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</span>
-              ${isNewChannel(data.createdAt) ? '<span class="text-xs px-2 py-1 rounded-full font-medium bg-yellow-100 text-yellow-700">🆕 Новый</span>' : ''}
+              <span class="text-sm text-gray-500 dark:text-gray-400">Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</span>
+              ${isNewChannel(data.createdAt) ? '<span class="text-xs px-2 py-1 rounded-full font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200">🆕 Новый</span>' : ''}
             </div>
             <a href="${data.link}" target="_blank" class="text-blue-600 hover:underline text-sm">${data.link}</a>
-            ${data.recommended ? '<span class="text-xs inline-block mt-2 bg-green-100 text-green-700 px-2 py-1 rounded-full">✅ Рекомендуем</span>' : ''}
+            ${data.recommended ? '<span class="text-xs inline-block mt-2 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded-full">✅ Рекомендуем</span>' : ''}
             <button onclick="navigator.clipboard.writeText('${data.link}').then(() => alert('Ссылка скопирована!'))" class="text-xs mt-2 block text-gray-500 hover:text-gray-700">📋 Копировать ссылку</button>
           </div>
         `;
@@ -207,6 +207,13 @@ onSnapshot(q, (snapshot) => {
       localStorage.setItem("theme", isDark ? "dark" : "light");
     });
   </script>
+<footer class="p-4 sm:p-6 text-center text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700">
+  <nav class="mb-2 space-x-4">
+    <a href="/about.html" class="hover:underline">О проекте</a>
+    <a href="/contact.html" class="hover:underline">Контакты</a>
+    <a href="/faq.html" class="hover:underline">FAQ</a>
+  </nav>
+  TelegramInsight © 2025 · <a href="https://t.me/telegraminsight" target="_blank" class="hover:underline">Наш Telegram</a>
+</footer>
 </body>
 </html>
-
