@@ -10,7 +10,15 @@
   <div class="max-w-xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4">Добавление канала</h1>
 
-    <form id="channel-form" class="space-y-4">
+    <!-- 🔒 Форма входа -->
+    <form id="login-form" class="space-y-4 mb-8">
+      <input type="email" id="email" placeholder="Email" required class="w-full border px-3 py-2 rounded">
+      <input type="password" id="password" placeholder="Пароль" required class="w-full border px-3 py-2 rounded">
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Войти</button>
+    </form>
+
+    <!-- ✅ Форма добавления канала -->
+    <form id="channel-form" class="space-y-4 hidden">
       <input name="image" type="url" placeholder="Ссылка на изображение (например, с Imgur)" class="w-full border px-3 py-2 rounded">
       <input name="title" required placeholder="Название канала" class="w-full border px-3 py-2 rounded">
       <textarea name="description" placeholder="Описание" class="w-full border px-3 py-2 rounded"></textarea>
@@ -27,14 +35,14 @@
       <label class="inline-flex items-center text-sm">
         <input type="checkbox" name="recommended" class="mr-2"> Рекомендуемый канал
       </label>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Сохранить</button>
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Сохранить</button>
     </form>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDfMcGtHvwFqCKu5x5a1UnMpBSf2ayPapE",
@@ -49,29 +57,47 @@
     const db = getFirestore();
     const auth = getAuth();
 
-    const form = document.getElementById("channel-form");
+    const loginForm = document.getElementById("login-form");
+    const channelForm = document.getElementById("channel-form");
 
-    form.addEventListener("submit", async (e) => {
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const formData = new FormData(form);
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        loginForm.classList.add("hidden");
+        channelForm.classList.remove("hidden");
+      } catch (error) {
+        alert("Ошибка входа: " + error.message);
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginForm.classList.add("hidden");
+        channelForm.classList.remove("hidden");
+      }
+    });
+
+    channelForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(channelForm);
       let data = Object.fromEntries(formData);
-      data.recommended = form.querySelector('[name="recommended"]').checked;
+      data.recommended = channelForm.querySelector('[name="recommended"]').checked;
       if (!data.category) data.category = "finance";
 
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          await addDoc(collection(db, "channels"), {
-            ...data,
-            createdAt: new Date()
-          });
-          form.reset();
-          alert("Канал успешно добавлен!");
-        } else {
-          alert("Вы должны войти в систему, чтобы добавить канал.");
-        }
+      await addDoc(collection(db, "channels"), {
+        ...data,
+        createdAt: new Date()
       });
+
+      channelForm.reset();
+      alert("Канал успешно добавлен!");
     });
   </script>
 </body>
 </html>
+
 
