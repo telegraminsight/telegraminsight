@@ -42,6 +42,18 @@
         document.documentElement.classList.add('dark');
       }
     })();
+
+    // Инициализируем переключение темы сразу, чтобы оно было доступно до полной загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', function() {
+          document.documentElement.classList.toggle('dark');
+          const isDark = document.documentElement.classList.contains('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+      }
+    });
   </script>
 </head>
 
@@ -170,7 +182,6 @@
     const mobileNav = document.getElementById("mobile-nav");
     const logoutBtn = document.getElementById("logout-btn");
     const scrollToTopBtn = document.getElementById("scroll-to-top");
-    const themeToggleBtn = document.getElementById("theme-toggle");
     const userAvatar = document.getElementById("user-avatar");
     const userMenu = document.getElementById("user-menu");
 
@@ -461,14 +472,16 @@
     });
 
     // Обработчик для кнопки выхода
-    logoutBtn?.addEventListener("click", () => {
-      auth.signOut()
-        .then(() => {
-          userAvatar.classList.add("hidden");
-          userMenu?.classList.add("hidden");
-        })
-        .catch(error => console.error("Ошибка при выходе:", error));
-    });
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        auth.signOut()
+          .then(() => {
+            if (userAvatar) userAvatar.classList.add("hidden");
+            if (userMenu) userMenu.classList.add("hidden");
+          })
+          .catch(error => console.error("Ошибка при выходе:", error));
+      });
+    }
 
     // Обработчик для кнопки прокрутки наверх
     window.addEventListener("scroll", () => {
@@ -485,20 +498,17 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    // Обработчик для переключения темы
-    themeToggleBtn.addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-      const isDark = document.documentElement.classList.contains("dark");
-      localStorage.setItem("theme", isDark ? "dark" : "light");
-    });
-
     // Обработчик авторизации пользователя
     onAuthStateChanged(auth, (user) => {
       if (user && user.email) {
         const letter = user.email[0].toUpperCase();
-        userAvatar.textContent = letter;
-        userAvatar.classList.remove("hidden");
-        userMenu?.classList.remove("hidden");
+        if (userAvatar) {
+          userAvatar.textContent = letter;
+          userAvatar.classList.remove("hidden");
+        }
+        if (userMenu) {
+          userMenu.classList.remove("hidden");
+        }
       }
     });
 
@@ -522,24 +532,21 @@
     };
 
     // Анимация элементов при загрузке
-    document.addEventListener("DOMContentLoaded", () => {
-      const elementsToAnimate = [
-        document.getElementById("catalog-heading"),
-        document.getElementById("filters-block"),
-        document.getElementById("pagination"),
-        document.getElementById("catalog-footer")
-      ];
-      
-      animateElements(elementsToAnimate);
-      loadChannels();
-    });
-
+    const elementsToAnimate = [
+      document.getElementById("catalog-heading"),
+      document.getElementById("filters-block"),
+      document.getElementById("pagination"),
+      document.getElementById("catalog-footer")
+    ];
+    
+    // Запускаем анимацию сразу, не дожидаясь DOMContentLoaded
+    animateElements(elementsToAnimate.filter(Boolean));
+    
     // Инициализация загрузки данных
     loadChannels();
   </script>
 </body>
 </html>
-
 
 
 
