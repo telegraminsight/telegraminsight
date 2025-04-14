@@ -55,6 +55,21 @@
       font-feature-settings: "ss01" on, "calt" on;
       -webkit-font-smoothing: antialiased;
     }
+
+    /* Обновление для устранения всплывающего текста "Читать далее" */
+    .channel-description-wrapper {
+      position: relative;
+    }
+    .channel-description-wrapper .read-more-button {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1));
+      padding-left: 10px;
+    }
+    .channel-description-wrapper.max-height .read-more-button {
+      display: none;
+    }
   </style>
 </head>
 
