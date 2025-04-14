@@ -70,7 +70,7 @@
     }
   </script>
 </head>
-<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 text-base leading-relaxed">
   <header class="border-b dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
   <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
     <div class="flex items-center gap-3">
@@ -110,7 +110,7 @@
         🌗 Тема
       </button>
     </div>
-    <h1 class="text-3xl font-bold mb-6 opacity-0 translate-y-4 transition duration-500" id="catalog-heading">Каталог Telegram-каналов</h1>
+    <h1 class="text-4xl font-semibold tracking-tight mb-6 opacity-0 translate-y-4 transition duration-500" id="catalog-heading">Каталог Telegram-каналов</h1>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 opacity-0 translate-y-4 transition duration-500" id="filters-block">
       <input id="search-input" type="text" placeholder="Поиск по названию или описанию..." class="border px-3 py-2 rounded text-sm w-full sm:w-64 bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
@@ -190,7 +190,7 @@
           <div class="flex-shrink-0">${avatar}</div>
           <div class="flex-1 min-w-0">
             <h2 class="text-lg font-semibold mb-1">${data.title}</h2>
-            <p class="text-gray-600 dark:text-gray-300 line-clamp-3 transition-all duration-500 ease-in-out overflow-hidden max-h-[4.5em]">${data.description || '—'}</p>
+            <p class="text-gray-600 dark:text-gray-300 line-clamp-3 text-base leading-relaxed transition-all duration-500 ease-in-out overflow-hidden max-h-[4.5em]">${data.description || '—'}</p>
 ${(data.description || '').length > 120 ? `<button onclick="const desc = this.previousElementSibling; desc.style.maxHeight = desc.scrollHeight + 'px';
 setTimeout(() => {
   desc.classList.remove('line-clamp-3');
@@ -202,7 +202,7 @@ setTimeout(() => {
               <span class="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
                 ${categoryLabel(data.category)}
               </span>
-              <span class="text-sm text-gray-500 dark:text-gray-400">Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</span>
+              <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</span>
               ${isNewChannel(data.createdAt) ? '<span class="text-xs px-2 py-1 rounded-full font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200">🆕 Новый</span>' : ''}
             </div>
             <a href="${data.link}" target="_blank" class="text-blue-600 hover:underline text-sm">${data.link}</a>
