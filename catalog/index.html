@@ -8,22 +8,40 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
   <meta name="theme-color" content="#2563eb">
-  <script>
-  (function () {
-    const theme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (theme === 'dark' || (!theme && prefersDark)) {
-      document.documentElement.classList.add('dark');
-    }
-  })();
-</script>
 
-  
+  <!-- Установка темы до загрузки CSS -->
+  <script>
+    (function () {
+      const theme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+
+  <!-- Tailwind CSS и шрифты -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              800: '#1e293b',
+              900: '#0f172a'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <style>
     html {
       font-family: 'Inter', sans-serif;
@@ -38,31 +56,6 @@
       -webkit-font-smoothing: antialiased;
     }
   </style>
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            dark: {
-              800: '#1e293b',
-              900: '#0f172a'
-            }
-          }
-        }
-      }
-    }
-    
-    // Инициализация темы
-    (function () {
-      const theme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (theme === 'dark' || (!theme && prefersDark)) {
-        document.documentElement.classList.add('dark');
-      }
-    })();
-  </script>
 </head>
 
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 text-base leading-relaxed transition-colors duration-300">
