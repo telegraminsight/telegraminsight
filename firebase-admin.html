@@ -57,7 +57,11 @@
       data.recommended = form.querySelector('[name="recommended"]').checked;
       if (!data.category) data.category = "finance";
 
-      await addDoc(collection(db, "channels"), data);
+     await addDoc(collection(db, "channels"), {
+  ...data,
+  createdAt: new Date()  // или serverTimestamp(), если используем серверное время
+});
+
       form.reset();
       alert("Канал успешно добавлен!");
     });
