@@ -15,6 +15,13 @@
     <h1 class="text-3xl font-bold mb-6">Каталог Telegram-каналов</h1>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+      <input id="search-input" type="text" placeholder="Поиск по названию или описанию..." class="border px-3 py-2 rounded text-sm w-full sm:w-64">
+      <select id="sort-mode" class="border px-3 py-2 rounded text-sm">
+        <option value="title">По алфавиту</option>
+        <option value="subscribers">По подписчикам</option>
+        <option value="er">По ER</option>
+      </select>
+
       <select id="filter-category" class="border px-3 py-2 rounded text-sm">
         <option value="all">Все категории</option>
         <option value="books">Книги</option>
@@ -28,6 +35,13 @@
       </label>
     </div>
 
+    <div id="channel-count" class="text-sm text-gray-600 mb-4 flex items-center gap-2">
+      <svg id="loading-icon" class="animate-spin h-4 w-4 text-blue-500 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <span id="channel-count-text"></span>
+    </div>
     <div id="channel-list" class="space-y-6"></div>
     <div id="pagination" class="mt-8 flex flex-wrap justify-center gap-4 text-sm font-medium text-blue-600"></div>
   </div>
@@ -57,22 +71,31 @@
     const pageSize = 6;
 
     function renderChannels(docs, page) {
+      const text = document.getElementById("channel-count-text");
+      const loader = document.getElementById("loading-icon");
+      loader.classList.add("hidden");
+      text.textContent = docs.length ? `Найдено каналов: ${docs.length}` : "Каналы не найдены.";
       channelList.innerHTML = "";
       const start = (page - 1) * pageSize;
       const end = start + pageSize;
       docs.slice(start, end).forEach((data) => {
         const div = document.createElement("div");
         div.className = "border rounded-xl p-5 shadow bg-white flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0";
-       const avatar = data.image && data.image.startsWith("http")
-  ? `<img src="${data.image}" alt="${data.title}" class="w-12 h-12 rounded-full object-cover">`
-  : `<div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>`;
-
+        const avatar = data.image && data.image.startsWith("http")
+          ? `<img src="${data.image}" alt="${data.title}" class="w-12 h-12 rounded-full object-cover">`
+          : `<div class="w-12 h-12 bg-blue-100 text-blue-700 flex items-center justify-center rounded-full text-lg font-bold">TG</div>`;
         div.innerHTML = `
           <div class="flex-shrink-0">${avatar}</div>
           <div>
             <h2 class="text-lg font-semibold mb-1">${data.title}</h2>
             <p class="text-gray-600">${data.description || '—'}</p>
-            <p class="text-sm text-gray-500 mt-2">Категория: ${data.category || '—'} · Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</p>
+            <div class="flex items-center flex-wrap gap-2 mt-2">
+              <span class="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
+                ${categoryLabel(data.category)}
+              </span>
+              <span class="text-sm text-gray-500">Подписчиков: ${data.subscribers || '—'} · ER: ${data.er || '—'}</span>
+              ${isNewChannel(data.createdAt) ? '<span class="text-xs px-2 py-1 rounded-full font-medium bg-yellow-100 text-yellow-700">🆕 Новый</span>' : ''}
+            </div>
             <a href="${data.link}" target="_blank" class="text-blue-600 hover:underline text-sm">${data.link}</a>
             ${data.recommended ? '<span class="text-xs inline-block mt-2 bg-green-100 text-green-700 px-2 py-1 rounded-full">✅ Рекомендуем</span>' : ''}
             <button onclick="navigator.clipboard.writeText('${data.link}').then(() => alert('Ссылка скопирована!'))" class="text-xs mt-2 block text-gray-500 hover:text-gray-700">📋 Копировать ссылку</button>
@@ -109,7 +132,9 @@
     }
 
     const q = query(collection(db, "channels"));
-    onSnapshot(q, (snapshot) => {
+    document.getElementById("loading-icon").classList.remove("hidden");
+onSnapshot(q, (snapshot) => {
+      const searchTerm = (document.getElementById("search-input")?.value || '').toLowerCase();
       let docs = snapshot.docs.map(doc => doc.data());
 
       if (filterCategory.value !== "all") {
@@ -119,7 +144,17 @@
         docs = docs.filter((d) => d.recommended);
       }
 
-      docs.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      docs = docs.filter((d) => {
+        return (d.title || '').toLowerCase().includes(searchTerm) || (d.description || '').toLowerCase().includes(searchTerm);
+      });
+      const sortMode = document.getElementById("sort-mode")?.value || 'title';
+      if (sortMode === 'subscribers') {
+        docs.sort((a, b) => parseInt(b.subscribers || 0) - parseInt(a.subscribers || 0));
+      } else if (sortMode === 'er') {
+        docs.sort((a, b) => parseFloat(b.er || 0) - parseFloat(a.er || 0));
+      } else {
+        docs.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      }
       const totalPages = Math.ceil(docs.length / pageSize);
 
       renderChannels(docs, currentPage);
@@ -128,6 +163,31 @@
 
     filterCategory.addEventListener("change", () => location.reload());
     filterRecommended.addEventListener("change", () => location.reload());
+    document.getElementById("search-input").addEventListener("input", () => location.reload());
+    document.getElementById("sort-mode").addEventListener("change", () => location.reload());
+  
+    function categoryLabel(cat) {
+      const map = {
+        books: '📚 Книги',
+        finance: '💸 Финансы',
+        news: '📰 Новости',
+        education: '🎓 Образование'
+      };
+      return map[cat] || '📁 Другое';
+    }
+  
+    function isNewChannel(timestamp) {
+      if (!timestamp) return false;
+      try {
+        const created = new Date(timestamp.seconds * 1000);
+        const now = new Date();
+        const diff = (now - created) / (1000 * 60 * 60 * 24); // разница в днях
+        return diff <= 7;
+      } catch {
+        return false;
+      }
+    }
   </script>
 </body>
 </html>
+
