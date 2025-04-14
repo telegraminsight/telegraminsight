@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+  <head>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -17,6 +19,14 @@
     -webkit-font-smoothing: antialiased;
   }
 </style>
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог Telegram-каналов — TelegramInsight</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
+  <meta name="theme-color" content="#2563eb">
   <script>
   (function () {
     const theme = localStorage.getItem('theme');
@@ -26,14 +36,7 @@
     }
   })();
 </script>
-$1
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Каталог Telegram-каналов — TelegramInsight</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
-  <meta name="theme-color" content="#2563eb">
-  <script src="https://cdn.tailwindcss.com">// Мобильное меню
+// Мобильное меню
     const menuToggle = document.getElementById("menu-toggle");
     const mobileNav = document.getElementById("mobile-nav");
     menuToggle?.addEventListener("click", () => {
@@ -387,6 +390,7 @@ onSnapshot(q, (snapshot) => {
 <button id="scroll-to-top" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all duration-300 transform opacity-0 scale-90 pointer-events-none">↑</button>
 </body>
 </html>
+
 
 
 
