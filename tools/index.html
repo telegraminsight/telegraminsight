@@ -20,7 +20,7 @@
       <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">
         Позволяет оценить вовлеченность аудитории канала. Используется для определения подозрительной активности, связанной с накрутками просмотров.
       </p>
-      <a href="/tools/er.html" class="mt-3 inline-block px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Перейти к инструменту</a>
+      <a href="/tools/er.html" class="mt-3 inline-block px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Открыть</a>
     </div>
 
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-5">
@@ -28,7 +28,7 @@
       <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">
         Помогает понять, насколько естественно развивается канал. Всплески или резкое падение могут сигнализировать о накрутке или покупке рекламы.
       </p>
-      <button onclick="openModal('growth')" class="mt-3 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Открыть</button>
+      <a href="/tools/growth.html" class="mt-3 inline-block px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Открыть</a>
     </div>
 
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-5">
@@ -36,7 +36,7 @@
       <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">
         Инструмент выявляет несоответствия между числом подписчиков и количеством просмотров постов. Это может быть признаком использования ботов.
       </p>
-      <button onclick="openModal('reach')" class="mt-3 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Открыть</button>
+      <a href="/tools/reach.html" class="mt-3 inline-block px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Открыть</a>
     </div>
 
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-5">
@@ -44,51 +44,8 @@
       <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">
         Рассчитывает общий уровень доверия к каналу на основе множества метрик, включая ER, стабильность роста и активность.
       </p>
-      <button onclick="openModal('trust')" class="mt-3 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Открыть</button>
+      <a href="/tools/trust.html" class="mt-3 inline-block px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Открыть</a>
     </div>
   </main>
-
-  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
-      <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">✕</button>
-      <h3 id="modal-title" class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">Инструмент</h3>
-      <p id="modal-desc" class="text-sm text-gray-700 dark:text-gray-300">Описание инструмента</p>
-    </div>
-  </div>
-
-  <script>
-    const modal = document.getElementById("modal");
-    const title = document.getElementById("modal-title");
-    const desc = document.getElementById("modal-desc");
-
-    const descriptions = {
-      er: {
-        title: "Анализ Engagement Rate (ER)",
-        text: "Этот инструмент поможет вам определить уровень вовлеченности подписчиков. Чем ниже ER, тем выше вероятность накрутки или неактивной аудитории."
-      },
-      growth: {
-        title: "Отслеживание динамики подписчиков",
-        text: "Графики роста и падения подписчиков позволяют распознать искусственное увеличение аудитории."
-      },
-      reach: {
-        title: "Проверка аномалий охвата",
-        text: "Анализ расхождения между числом просмотров и количеством подписчиков помогает выявить аномалии."
-      },
-      trust: {
-        title: "Индекс стабильности канала",
-        text: "Комплексная метрика, отображающая надёжность и стабильность поведения аудитории."
-      }
-    };
-
-    function openModal(key) {
-      title.textContent = descriptions[key].title;
-      desc.textContent = descriptions[key].text;
-      modal.classList.remove("hidden");
-    }
-
-    function closeModal() {
-      modal.classList.add("hidden");
-    }
-  </script>
 </body>
 </html>
