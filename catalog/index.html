@@ -43,34 +43,86 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    html {
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    h1, h2, h3 {
-      font-weight: 600;
-    }
-    body {
-      font-feature-settings: "ss01" on, "calt" on;
-      -webkit-font-smoothing: antialiased;
+  html {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  h1, h2, h3 {
+    font-weight: 600;
+  }
+  body {
+    font-feature-settings: "ss01" on, "calt" on;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  /* Стили для описания с кнопкой «Читать далее» */
+  .channel-description-wrapper {
+    position: relative;
+    max-height: 4.5em;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+  .channel-description-wrapper.expanded {
+    max-height: none;
+  }
+  .read-more-button {
+    display: block;
+    margin-top: 4px;
+    color: #3b82f6;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .read-more-button:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  // JS логика для "Читать далее"
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".read-more-button").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const wrapper = this.closest(".channel-description-wrapper");
+        if (wrapper) {
+          wrapper.classList.add("expanded");
+          this.remove();
+        }
+      });
+    });
+
+    // Тема — обновление с анимацией
+    const themeToggle = document.getElementById("theme-toggle");
+    const themeToggleIcon = document.getElementById("theme-toggle-icon");
+    const themeToggleText = document.getElementById("theme-toggle-text");
+
+    function updateThemeUI() {
+      const isDark = document.documentElement.classList.contains("dark");
+      themeToggleIcon.textContent = isDark ? "☀️" : "🌙";
+      themeToggleText.textContent = isDark ? "Светлая" : "Тёмная";
+      document.querySelector('meta[name="theme-color"]').setAttribute(
+        "content",
+        isDark ? "#0f172a" : "#ffffff"
+      );
     }
 
-    /* Обновление для устранения всплывающего текста "Читать далее" */
-    .channel-description-wrapper {
-      position: relative;
-    }
-    .channel-description-wrapper .read-more-button {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1));
-      padding-left: 10px;
-    }
-    .channel-description-wrapper.max-height .read-more-button {
-      display: none;
-    }
-  </style>
+    themeToggle?.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem(
+        "theme",
+        document.documentElement.classList.contains("dark") ? "dark" : "light"
+      );
+      updateThemeUI();
+    });
+
+    updateThemeUI();
+  });
+</script>
+</body>
+</html>
+
 </head>
 
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 text-base leading-relaxed transition-colors duration-300">
