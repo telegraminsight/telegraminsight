@@ -78,51 +78,7 @@
   .read-more-button:hover {
     text-decoration: underline;
   }
-</style>
-
-<script>
-  // JS логика для "Читать далее"
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".read-more-button").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const wrapper = this.closest(".channel-description-wrapper");
-        if (wrapper) {
-          wrapper.classList.add("expanded");
-          this.remove();
-        }
-      });
-    });
-
-    // Тема — обновление с анимацией
-    const themeToggle = document.getElementById("theme-toggle");
-    const themeToggleIcon = document.getElementById("theme-toggle-icon");
-    const themeToggleText = document.getElementById("theme-toggle-text");
-
-    function updateThemeUI() {
-      const isDark = document.documentElement.classList.contains("dark");
-      themeToggleIcon.textContent = isDark ? "☀️" : "🌙";
-      themeToggleText.textContent = isDark ? "Светлая" : "Тёмная";
-      document.querySelector('meta[name="theme-color"]').setAttribute(
-        "content",
-        isDark ? "#0f172a" : "#ffffff"
-      );
-    }
-
-    themeToggle?.addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-      localStorage.setItem(
-        "theme",
-        document.documentElement.classList.contains("dark") ? "dark" : "light"
-      );
-      updateThemeUI();
-    });
-
-    updateThemeUI();
-  });
-</script>
-</body>
-</html>
-
+  </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 text-base leading-relaxed transition-colors duration-300">
@@ -139,7 +95,7 @@
         </div>
       </div>
       
-      <button id="menu-toggle" class="sm:hidden text-gray-600 dark:text-gray-300 focus:outline-none transition-colors duration-300">
+      <button id="menu-toggle" class="sm:hidden text-gray-600 dark:text-gray-300 focus:outline-none transition-colors duration-300" aria-label="Открыть меню">
         ☰
       </button>
       
@@ -163,7 +119,7 @@
   
   <div class="max-w-4xl mx-auto px-4 py-10">
     <div class="flex justify-end mb-4">
-      <button id="theme-toggle" class="px-3 py-1 text-sm border rounded text-gray-600 dark:text-gray-300 dark:border-gray-500 transition-colors duration-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+      <button id="theme-toggle" class="px-3 py-1 text-sm border rounded text-gray-600 dark:text-gray-300 dark:border-gray-500 transition-colors duration-300 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Переключить тему">
         <span id="theme-toggle-icon" class="transition duration-300">🌙</span> <span id="theme-toggle-text">Тема</span>
       </button>
     </div>
@@ -171,15 +127,15 @@
     <h1 class="text-4xl font-semibold tracking-tight mb-6 opacity-0 translate-y-4 transition duration-500 dark:text-white" id="catalog-heading">Каталог Telegram-каналов</h1>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 opacity-0 translate-y-4 transition duration-500" id="filters-block">
-      <input id="search-input" type="text" placeholder="Поиск по названию или описанию..." class="border px-3 py-2 rounded text-sm w-full sm:w-64 bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 transition-colors duration-300">
+      <input id="search-input" type="text" placeholder="Поиск по названию или описанию..." class="border px-3 py-2 rounded text-sm w-full sm:w-64 bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 transition-colors duration-300" aria-label="Поиск">
       
-      <select id="sort-mode" class="border px-3 py-2 rounded text-sm bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 transition-colors duration-300">
+      <select id="sort-mode" class="border px-3 py-2 rounded text-sm bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 transition-colors duration-300" aria-label="Сортировка">
         <option value="title">По алфавиту</option>
         <option value="subscribers">По подписчикам</option>
         <option value="er">По ER</option>
       </select>
 
-      <select id="filter-category" class="border px-3 py-2 rounded text-sm bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 transition-colors duration-300">
+      <select id="filter-category" class="border px-3 py-2 rounded text-sm bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 transition-colors duration-300" aria-label="Фильтр по категории">
         <option value="all">Все категории</option>
         <option value="books">Книги</option>
         <option value="finance">Финансы</option>
@@ -194,7 +150,7 @@
     </div>
 
     <div id="channel-count" class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex items-center gap-2 transition-colors duration-300">
-      <svg id="loading-icon" class="animate-spin h-4 w-4 text-blue-500 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg id="loading-icon" class="animate-spin h-4 w-4 text-blue-500 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
       </svg>
@@ -214,17 +170,18 @@
     TelegramInsight © 2025 · <a href="https://t.me/telegraminsight" target="_blank" class="hover:underline">Наш Telegram</a>
   </footer>
   
-  <button id="scroll-to-top" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all duration-300 transform opacity-0 scale-90 pointer-events-none">↑</button>
+  <button id="scroll-to-top" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all duration-300 transform opacity-0 scale-90 pointer-events-none" aria-label="Прокрутить наверх">↑</button>
 
   <!-- Скрипты -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Конфигурация Firebase - в реальном проекте лучше скрыть API ключ через переменные окружения
+    // Конфигурация Firebase - в реальном проекте API ключ должен быть защищен
+    // Используйте переменные окружения или серверные методы для защиты API ключей
     const firebaseConfig = {
-      apiKey: "AIzaSyDfMcGtHvwFqCKu5x5a1UnMpBSf2ayPapE",
+      apiKey: process.env.FIREBASE_API_KEY || "YOUR_API_KEY_PLACEHOLDER",
       authDomain: "telegraminsight.firebaseapp.com",
       projectId: "telegraminsight",
       storageBucket: "telegraminsight.appspot.com",
@@ -233,9 +190,16 @@
     };
 
     // Инициализация Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore();
-    const auth = getAuth();
+    let app, db, auth;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore();
+      auth = getAuth();
+    } catch (error) {
+      console.error("Ошибка инициализации Firebase:", error);
+      document.getElementById("channel-count-text").textContent = 
+        "Ошибка подключения к базе данных. Пожалуйста, попробуйте позже.";
+    }
 
     // Элементы DOM
     const filterCategory = document.getElementById("filter-category");
@@ -261,7 +225,7 @@
     const pageSize = 6;
     let allDocs = [];
     
-    // Управление темной темой
+    // Управление темной темой - унифицированная функция
     function updateThemeUI() {
       const isDark = document.documentElement.classList.contains('dark');
       
@@ -287,7 +251,7 @@
       updateThemeUI();
     });
 
-    // Функция для отрисовки каналов
+    // Оптимизированная функция для отрисовки каналов
     function renderChannels(docs, page) {
       loadingIcon.classList.add("hidden");
       channelList.classList.remove("hidden");
@@ -334,33 +298,28 @@
         title.textContent = data.title || "Без названия";
         channelCard.appendChild(title);
         
-        // Описание
-          const description = document.createElement("p");
-
- 
-
-        description.className = "text-gray-600 dark:text-gray-300 line-clamp-3 text-base leading-relaxed transition-all duration-500 ease-in-out overflow-hidden max-h-[4.5em]";
- 
-
+        // Описание - исправлена несогласованность в коде
+        const descriptionWrapper = document.createElement("div");
+        descriptionWrapper.className = "channel-description-wrapper";
+        
+        const description = document.createElement("p");
+        description.className = "text-gray-600 dark:text-gray-300 text-base leading-relaxed transition-colors duration-300";
         description.textContent = data.description || "—";
- 
-
-        channelCard.appendChild(description);
+        
+        descriptionWrapper.appendChild(description);
+        channelCard.appendChild(descriptionWrapper);
         
         // Кнопка "Читать далее"
         if ((data.description || "").length > 120) {
           const readMoreBtn = document.createElement("button");
-          readMoreBtn.className = "mt-1 text-xs text-blue-500 dark:text-blue-400 hover:underline transition-colors duration-300";
+          readMoreBtn.className = "read-more-button";
           readMoreBtn.textContent = "Читать далее";
           readMoreBtn.addEventListener("click", function() {
-            description.style.maxHeight = description.scrollHeight + "px";
-            setTimeout(() => {
-              description.classList.remove("line-clamp-3");
-              description.classList.add("max-h-full");
-              description.style.maxHeight = null;
-              description.scrollIntoView({ behavior: "smooth", block: "start" });
-            }, 300);
-            this.remove();
+            const wrapper = this.previousElementSibling;
+            if (wrapper && wrapper.classList.contains("channel-description-wrapper")) {
+              wrapper.classList.add("expanded");
+              this.remove();
+            }
           });
           channelCard.appendChild(readMoreBtn);
         }
@@ -391,10 +350,15 @@
         
         channelCard.appendChild(metaData);
         
-        // Ссылка
+        // Ссылка - улучшена безопасность
         const link = document.createElement("a");
-        link.href = data.link || "#";
-        link.target = "_blank";
+        if (data.link && (data.link.startsWith("https://") || data.link.startsWith("http://"))) {
+          link.href = data.link;
+          link.rel = "noopener noreferrer"; // Безопасность для внешних ссылок
+          link.target = "_blank";
+        } else {
+          link.href = "#";
+        }
         link.className = "text-blue-600 dark:text-blue-400 hover:underline text-sm transition-colors duration-300";
         link.textContent = data.link || "Ссылка отсутствует";
         channelCard.appendChild(link);
@@ -407,15 +371,27 @@
           channelCard.appendChild(recommendedBadge);
         }
         
-        // Кнопка копирования
+        // Кнопка копирования - улучшена безопасность
         const copyBtn = document.createElement("button");
         copyBtn.className = "text-xs mt-2 block text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-300";
         copyBtn.textContent = "📋 Копировать ссылку";
         copyBtn.addEventListener("click", () => {
-          if (data.link) {
+          if (data.link && (data.link.startsWith("https://") || data.link.startsWith("http://"))) {
             navigator.clipboard.writeText(data.link)
-              .then(() => alert("Ссылка скопирована!"))
-              .catch(err => alert("Ошибка при копировании: " + err));
+              .then(() => {
+                // Более плавное уведомление вместо alert
+                const notification = document.createElement("div");
+                notification.className = "fixed top-4 right-4 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300";
+                notification.textContent = "Ссылка скопирована!";
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.classList.add("opacity-100"), 10);
+                setTimeout(() => {
+                  notification.classList.remove("opacity-100");
+                  setTimeout(() => notification.remove(), 300);
+                }, 2000);
+              })
+              .catch(err => console.error("Ошибка при копировании:", err));
           }
         });
         channelCard.appendChild(copyBtn);
@@ -427,7 +403,7 @@
         div.classList.add("translate-y-4", "opacity-0", "transition", "duration-500");
         channelList.appendChild(div);
         
-        // Анимация появления
+        // Анимация появления с оптимизацией IntersectionObserver
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -436,7 +412,7 @@
               observer.unobserve(entry.target);
             }
           });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.1, rootMargin: "50px" });
         
         observer.observe(div);
       });
@@ -450,6 +426,7 @@
         const prev = document.createElement("button");
         prev.textContent = "← Предыдущая";
         prev.className = "hover:underline dark:text-blue-400 transition-colors duration-300";
+        prev.setAttribute("aria-label", "Перейти на предыдущую страницу");
         prev.addEventListener("click", () => {
           currentPage--;
           renderChannels(docs, currentPage);
@@ -463,6 +440,7 @@
         const next = document.createElement("button");
         next.textContent = "Следующая →";
         next.className = "hover:underline dark:text-blue-400 transition-colors duration-300";
+        next.setAttribute("aria-label", "Перейти на следующую страницу");
         next.addEventListener("click", () => {
           currentPage++;
           renderChannels(docs, currentPage);
@@ -542,32 +520,34 @@
       }
     }
 
-    // Загрузка данных из Firestore
-    function loadChannels() {
+    // Загрузка данных из Firestore - изменено на getDocs для снижения нагрузки
+    async function loadChannels() {
+      if (!db) return;
+      
       loadingIcon.classList.remove("hidden");
       
       try {
         const q = query(collection(db, "channels"));
+        const snapshot = await getDocs(q);
         
-        onSnapshot(q, (snapshot) => {
-          allDocs = snapshot.docs.map(doc => doc.data());
-          filterAndRenderChannels();
-        }, (error) => {
-          console.error("Ошибка при загрузке данных:", error);
-          loadingIcon.classList.add("hidden");
-          channelCountText.textContent = "Ошибка при загрузке данных. Пожалуйста, попробуйте позже.";
-        });
+        allDocs = snapshot.docs.map(doc => doc.data());
+        filterAndRenderChannels();
       } catch (error) {
-        console.error("Ошибка инициализации запроса:", error);
+        console.error("Ошибка при загрузке данных:", error);
         loadingIcon.classList.add("hidden");
         channelCountText.textContent = "Ошибка при загрузке данных. Пожалуйста, попробуйте позже.";
       }
     }
 
-    // События для фильтров
+    // События для фильтров с дебаунсом для поискового поля
+    let searchTimeout;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(filterAndRenderChannels, 300);
+    });
+    
     filterCategory.addEventListener("change", filterAndRenderChannels);
     filterRecommended.addEventListener("change", filterAndRenderChannels);
-    searchInput.addEventListener("input", filterAndRenderChannels);
     sortMode.addEventListener("change", filterAndRenderChannels);
 
     // Обработчик для мобильного меню
